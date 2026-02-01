@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Intelligence System</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Work+Sans:wght@300;400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --accent: #ec4899;
+            --bg: #0f172a;
+            --bg-light: #1e293b;
+            --bg-lighter: #334155;
+            --text: #f1f5f9;
+            --text-dim: #94a3b8;
+            --border: #475569;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+        
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 4rem;
+            padding: 3rem 0 2rem;
+            position: relative;
+        }
+        
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 2px;
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+        
+        .tagline {
+            font-size: 1.2rem;
+            color: var(--text-dim);
+            font-weight: 300;
+            font-family: 'Space Mono', monospace;
+        }
+        
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin-bottom: 4rem;
+            flex-wrap: wrap;
+        }
+        
+        .stat-card {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            min-width: 150px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            font-family: 'Space Mono', monospace;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        /* Feature Cards Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .feature-card {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.2);
+        }
+        
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+        
+        .feature-card h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+        
+        .feature-card p {
+            color: var(--text-dim);
+            margin-bottom: 2rem;
+            line-height: 1.7;
+        }
+        
+        .feature-button {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 0.875rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-family: 'Work Sans', sans-serif;
+            letter-spacing: 0.02em;
+        }
+        
+        .feature-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+        }
+        
+        .feature-button:active {
+            transform: translateY(0);
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 3rem;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: var(--bg-lighter);
+            border: 1px solid var(--border);
+            color: var(--text);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all 0.2s ease;
+        }
+        
+        .modal-close:hover {
+            background: var(--error);
+            border-color: var(--error);
+            transform: rotate(90deg);
+        }
+        
+        .modal h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+        
+        /* Form Elements */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: var(--bg);
+            margin-bottom: 1.5rem;
+        }
+        
+        .upload-zone:hover,
+        .upload-zone.dragover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+        
+        .upload-zone input[type="file"] {
+            display: none;
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 1rem;
+            font-family: 'Work Sans', sans-serif;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        button[type="submit"],
+        #uploadBtn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-family: 'Work Sans', sans-serif;
+        }
+        
+        button[type="submit"]:hover,
+        #uploadBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+        }
+        
+        button[type="submit"]:disabled,
+        #uploadBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* Results */
+        .result-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+        
+        .result-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .result-card:hover {
+            border-color: var(--primary);
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .result-filename {
+            font-weight: 600;
+            color: var(--text);
+            font-family: 'Space Mono', monospace;
+        }
+        
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .badge-invoice { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .badge-resume { background: rgba(99, 102, 241, 0.2); color: var(--primary); }
+        .badge-utility { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        .badge-other { background: rgba(148, 163, 184, 0.2); color: var(--text-dim); }
+        
+        .extracted-data {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .data-item {
+            background: var(--bg-light);
+            padding: 0.75rem;
+            border-radius: 8px;
+        }
+        
+        .data-label {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+        
+        .data-value {
+            color: var(--text);
+            font-weight: 600;
+            font-family: 'Space Mono', monospace;
+        }
+        
+        .search-result {
+            margin-bottom: 1.5rem;
+        }
+        
+        .relevance-score {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: 1rem;
+        }
+        
+        .preview-text {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-top: 0.75rem;
+            font-style: italic;
+        }
+        
+        .answer-box {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+            border: 1px solid var(--primary);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .answer-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--text);
+            margin-bottom: 1rem;
+        }
+        
+        .sources {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+        
+        .sources-label {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+        
+        .source-tag {
+            display: inline-block;
+            background: var(--bg-lighter);
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-right: 0.5rem;
+            font-family: 'Space Mono', monospace;
+        }
+        
+        /* Upload Section */
+        .upload-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .upload-overlay.active {
+            display: flex;
+        }
+        
+        .upload-overlay.uploading {
+            pointer-events: none;
+        }
+        
+        .upload-overlay.uploading .upload-overlay-content {
+            pointer-events: auto;
+        }
+        
+        .upload-overlay-content {
+            background: var(--bg-light);
+            border: 2px solid var(--primary);
+            border-radius: 16px;
+            padding: 3rem;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .upload-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .upload-section h2 {
+            font-size: 2rem;
+            color: var(--text);
+        }
+        
+        .close-upload-btn {
+            background: var(--bg-lighter);
+            border: 1px solid var(--border);
+            color: var(--text);
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all 0.2s ease;
+        }
+        
+        .close-upload-btn:hover {
+            background: var(--error);
+            border-color: var(--error);
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid var(--bg-lighter);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            text-align: center;
+            color: var(--text-dim);
+            margin-top: 1rem;
+        }
+        
+        /* Progress indicator */
+        .upload-progress {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-lighter);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 4px;
+            animation: progress-animation 2s ease-in-out infinite;
+            width: 30%;
+        }
+        
+        @keyframes progress-animation {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(400%); }
+        }
+        
+        .elapsed-time {
+            text-align: center;
+            color: var(--text-dim);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📄 Document Intelligence</h1>
+            <p class="tagline">Classify. Search. Understand.</p>
+        </header>
+        
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-value" id="totalDocs">0</div>
+                <div class="stat-label">Documents</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="invoiceCount">0</div>
+                <div class="stat-label">Invoices</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="resumeCount">0</div>
+                <div class="stat-label">Resumes</div>
+            </div>
+        </div>
+        
+        <!-- Feature Cards -->
+        <div class="features-grid">
+            <!-- Upload & Classify -->
+            <div class="feature-card" onclick="showUploadSection()">
+                <span class="feature-icon">📤</span>
+                <h2>Upload & Classify</h2>
+                <p>Upload any document (PDF, DOCX, TXT) and instantly get its classification with extracted structured data like invoice numbers, dates, amounts, and more.</p>
+                <button class="feature-button">
+                    Upload Document
+                </button>
+            </div>
+            
+            <!-- Semantic Search -->
+            <div class="feature-card" onclick="openModal('searchModal')">
+                <span class="feature-icon">🔍</span>
+                <h2>Semantic Search</h2>
+                <p>Search your documents by meaning, not just keywords. Find documents about "payments due in January" or "candidates with Python experience" using natural language.</p>
+                <button class="feature-button">
+                    Search Documents
+                </button>
+            </div>
+            
+            <!-- Q&A -->
+            <div class="feature-card" onclick="openModal('qaModal')">
+                <span class="feature-icon">💬</span>
+                <h2>Ask Questions</h2>
+                <p>Ask any question about your documents and get intelligent answers. The system will find relevant information and provide context-aware responses.</p>
+                <button class="feature-button">
+                    Ask a Question
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Upload Overlay (Not a modal, completely separate) -->
+    <div id="uploadOverlay" class="upload-overlay">
+        <div class="upload-overlay-content">
+            <div class="upload-section-header">
+                <h2>📤 Upload Document</h2>
+            </div>
+            
+            <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon">📄</div>
+                <p><strong>Click to browse</strong> or drag and drop</p>
+                <p style="color: var(--text-dim); font-size: 0.9rem;">PDF, DOCX, or TXT files</p>
+                <input type="file" id="fileInput" accept=".pdf,.docx,.doc,.txt">
+            </div>
+            
+            <div id="uploadFileName" style="text-align: center; color: var(--text-dim); margin-bottom: 1rem; margin-top: 1rem;"></div>
+            
+            <button type="button" id="uploadBtn" onclick="uploadDocument()" disabled>
+                Upload & Process
+            </button>
+            
+            <div id="uploadResult"></div>
+        </div>
+    </div>
+    
+    <!-- Search Modal -->
+    <div id="searchModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" id="searchModalClose" onclick="return false;">×</button>
+            <h2>🔍 Semantic Search</h2>
+            
+            <form onsubmit="searchDocuments(event)">
+                <div class="input-group">
+                    <label>Search Query</label>
+                    <input type="text" id="searchQuery" placeholder="e.g., Find all documents mentioning payments due in January" required>
+                </div>
+                
+                <button type="submit" id="searchBtn">
+                    Search
+                </button>
+            </form>
+            
+            <div id="searchResults"></div>
+        </div>
+    </div>
+    
+    <!-- Q&A Modal -->
+    <div id="qaModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" id="qaModalClose" onclick="return false;">×</button>
+            <h2>💬 Ask a Question</h2>
+            
+            <form onsubmit="askQuestion(event)">
+                <div class="input-group">
+                    <label>Your Question</label>
+                    <textarea id="questionInput" placeholder="e.g., What is the total amount due across all invoices?" required></textarea>
+                </div>
+                
+                <button type="submit" id="qaBtn">
+                    Get Answer
+                </button>
+            </form>
+            
+            <div id="qaResults"></div>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = 'http://localhost:8001';
+        
+        // Enable debug mode
+        const DEBUG = true;
+        
+        // CRITICAL: Global upload state
+        let isUploading = false;
+        let uploadStartTime = null;
+        let elapsedTimeInterval = null;
+        
+        // CRITICAL: Store abort controller globally
+        let currentUploadController = null;
+        
+        function debugLog(message, data = null) {
+            if (DEBUG) {
+                const timestamp = new Date().toISOString();
+                console.log(`[DEBUG ${timestamp}] ${message}`, data || '');
+            }
+        }
+        
+        // Load stats on page load
+        loadStats();
+        
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+        
+        function closeModal(modalId) {
+            if (isUploading && modalId === 'uploadModal') {
+                alert('Upload in progress! Please wait for it to complete.');
+                return false;
+            }
+            document.getElementById(modalId).classList.remove('active');
+            return false;
+        }
+        
+        function showUploadSection() {
+            debugLog('OPENING UPLOAD OVERLAY');
+            const overlay = document.getElementById('uploadOverlay');
+            if (!overlay) {
+                console.error('Upload overlay element not found!');
+                return;
+            }
+            overlay.classList.add('active');
+            debugLog('Overlay active class added');
+            
+            // Check every 100ms if it's still visible
+            const checkInterval = setInterval(() => {
+                if (!overlay.classList.contains('active') && isUploading) {
+                    console.error('OVERLAY WAS CLOSED WHILE UPLOADING! Re-opening...');
+                    overlay.classList.add('active');
+                }
+            }, 100);
+            
+            window.uploadCheckInterval = checkInterval;
+        }
+        
+        function hideUploadSection() {
+            if (isUploading) {
+                debugLog('ATTEMPTED TO CLOSE DURING UPLOAD - BLOCKED');
+                alert('Upload in progress! Please wait for it to complete.');
+                return;
+            }
+            debugLog('CLOSING UPLOAD OVERLAY');
+            document.getElementById('uploadOverlay').classList.remove('active');
+            
+            if (window.uploadCheckInterval) {
+                clearInterval(window.uploadCheckInterval);
+            }
+            
+            // Reset form when closing
+            resetUploadForm();
+        }
+        
+        // Prevent clicks on upload section from triggering modal handlers
+        const uploadOverlayInit = document.getElementById('uploadOverlay');
+        if (uploadOverlayInit) {
+            // Prevent overlay from closing on any background click
+            uploadOverlayInit.addEventListener('click', function(e) {
+                if (e.target === uploadOverlayInit && !isUploading) {
+                    hideUploadSection();
+                } else if (isUploading) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                }
+            });
+        }
+        
+        // File upload handling
+        const fileInput = document.getElementById('fileInput');
+        const uploadZone = document.getElementById('uploadZone');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const uploadFileName = document.getElementById('uploadFileName');
+        
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                uploadFileName.textContent = `Selected: ${e.target.files[0].name}`;
+                uploadBtn.disabled = false;
+            }
+        });
+        
+        // Drag and drop
+        uploadZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+        
+        uploadZone.addEventListener('dragleave', function(e) {
+            uploadZone.classList.remove('dragover');
+        });
+        
+        uploadZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            
+            if (e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                uploadFileName.textContent = `Selected: ${e.dataTransfer.files[0].name}`;
+                uploadBtn.disabled = false;
+            }
+        });
+        
+        // Format elapsed time
+        function formatElapsedTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        // Update elapsed time display
+        function updateElapsedTime() {
+            if (!uploadStartTime) return;
+            const elapsed = Math.floor((Date.now() - uploadStartTime) / 1000);
+            const elapsedElement = document.getElementById('elapsedTime');
+            if (elapsedElement) {
+                elapsedElement.textContent = `Processing... ${formatElapsedTime(elapsed)} elapsed`;
+            }
+        }
+        
+        // FIXED: Upload document with proper timeout handling
+        async function uploadDocument() {
+            if (isUploading) {
+                alert('Upload already in progress. Please wait...');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            if (!file) {
+                debugLog('No file selected');
+                return;
+            }
+            
+            debugLog('Starting upload', { filename: file.name, size: file.size });
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            const resultDiv = document.getElementById('uploadResult');
+            
+            // Show progress indicator with elapsed time
+            resultDiv.innerHTML = `
+                <div class="upload-progress">
+                    <div class="spinner"></div>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill"></div>
+                    </div>
+                    <div id="elapsedTime" class="elapsed-time">Processing... 0:00 elapsed</div>
+                    <div class="loading-text" style="margin-top: 1rem; color: var(--warning);">
+                        ⚠️ This may take up to 5 minutes. Do NOT close this window!
+                    </div>
+                </div>
+            `;
+            
+            uploadBtn.disabled = true;
+            const uploadZoneEl = document.getElementById('uploadZone');
+            uploadZoneEl.style.pointerEvents = 'none';
+            uploadZoneEl.style.opacity = '0.5';
+            
+            // CRITICAL: Set uploading state BEFORE any async operation
+            isUploading = true;
+            uploadStartTime = Date.now();
+            
+            // Start elapsed time counter
+            elapsedTimeInterval = setInterval(updateElapsedTime, 1000);
+            
+            // Add uploading style to make section fixed and centered
+            const uploadSection = document.getElementById('uploadOverlay');
+            uploadSection.classList.add('uploading');
+            
+            // CRITICAL: Create AbortController with 10-minute timeout (600000ms)
+            currentUploadController = new AbortController();
+            const timeoutId = setTimeout(() => {
+                debugLog('Request timeout - aborting after 10 minutes');
+                currentUploadController.abort();
+            }, 600000); // 10 minutes timeout
+            
+            try {
+                debugLog('Sending request to', `${API_URL}/upload`);
+                
+                const response = await fetch(`${API_URL}/upload`, {
+                    method: 'POST',
+                    body: formData,
+                    signal: currentUploadController.signal,
+                    // CRITICAL: Prevent browser from timing out
+                    keepalive: false
+                });
+                
+                // Clear the timeout since we got a response
+                clearTimeout(timeoutId);
+                
+                debugLog('Response status', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                debugLog('Response data', data);
+                
+                // Stop elapsed time counter
+                clearInterval(elapsedTimeInterval);
+                elapsedTimeInterval = null;
+                
+                // Display result
+                const categoryClass = data.category.toLowerCase().replace(' ', '-');
+                let html = `
+                    <div class="result-section">
+                        <div class="result-card">
+                            <div class="result-header">
+                                <span class="result-filename">${data.filename}</span>
+                                <span class="badge badge-${categoryClass}">${data.category}</span>
+                            </div>
+                `;
+                
+                if (Object.keys(data.extracted_data).length > 0) {
+                    html += '<div class="extracted-data">';
+                    for (const [key, value] of Object.entries(data.extracted_data)) {
+                        html += `
+                            <div class="data-item">
+                                <div class="data-label">${key.replace(/_/g, ' ')}</div>
+                                <div class="data-value">${value}</div>
+                            </div>
+                        `;
+                    }
+                    html += '</div>';
+                } else {
+                    html += '<p style="color: var(--text-dim);">No structured data extracted.</p>';
+                }
+                
+                html += '</div></div>';
+                html += '<button onclick="hideUploadSection()" style="background: var(--bg-light); color: var(--text); border: 1px solid var(--border); padding: 0.75rem 2rem; border-radius: 8px; margin-top: 1rem; cursor: pointer; width: 100%; margin-bottom: 1rem;">Close Upload</button>';
+                resultDiv.innerHTML = html;
+                
+                // Reload stats
+                loadStats();
+                
+                // CRITICAL: Reset upload state AFTER success
+                isUploading = false;
+                uploadStartTime = null;
+                uploadSection.classList.remove('uploading');
+                
+            } catch (error) {
+                // Clear the timeout
+                clearTimeout(timeoutId);
+                
+                // Stop elapsed time counter
+                if (elapsedTimeInterval) {
+                    clearInterval(elapsedTimeInterval);
+                    elapsedTimeInterval = null;
+                }
+                
+                // CRITICAL: Reset upload state on error
+                isUploading = false;
+                uploadStartTime = null;
+                currentUploadController = null;
+                
+                const uploadSection = document.getElementById('uploadOverlay');
+                uploadSection.classList.remove('uploading');
+                
+                debugLog('Upload error', error);
+                console.error('Full error:', error);
+                
+                let errorMessage = 'Error uploading file. ';
+                
+                if (error.name === 'AbortError') {
+                    errorMessage = 'Request timed out after 10 minutes. The server may be overloaded or the file is too large.';
+                } else if (error.message.includes('Failed to fetch')) {
+                    errorMessage += 'Cannot connect to API. Is the server running on port 8001?';
+                } else if (error.message.includes('CORS')) {
+                    errorMessage += 'CORS error. Check API CORS settings.';
+                } else {
+                    errorMessage += error.message;
+                }
+                
+                resultDiv.innerHTML = `
+                    <div style="color: var(--error); text-align: center; margin-top: 2rem; padding: 1rem; background: rgba(239, 68, 68, 0.1); border-radius: 8px;">
+                        <strong>❌ ${errorMessage}</strong>
+                        <br><br>
+                        <small>Check browser console (F12) for details</small>
+                    </div>
+                    <button onclick="resetUploadForm()" style="background: var(--bg-lighter); color: var(--text); border: 1px solid var(--border); padding: 0.75rem 2rem; border-radius: 8px; margin-top: 1rem; cursor: pointer; width: 100%;">Try Again</button>
+                `;
+                uploadBtn.disabled = false;
+                uploadZoneEl.style.pointerEvents = 'auto';
+                uploadZoneEl.style.opacity = '1';
+            }
+        }
+        
+        function resetUploadForm() {
+            fileInput.value = '';
+            uploadFileName.textContent = '';
+            document.getElementById('uploadResult').innerHTML = '';
+            uploadBtn.disabled = true;
+            const uploadZoneEl = document.getElementById('uploadZone');
+            uploadZoneEl.style.pointerEvents = 'auto';
+            uploadZoneEl.style.opacity = '1';
+            isUploading = false;
+            uploadStartTime = null;
+            
+            if (elapsedTimeInterval) {
+                clearInterval(elapsedTimeInterval);
+                elapsedTimeInterval = null;
+            }
+            
+            const uploadSection = document.getElementById('uploadOverlay');
+            uploadSection.classList.remove('uploading');
+        }
+        
+        // Search documents
+        async function searchDocuments(event) {
+            event.preventDefault();
+            
+            const query = document.getElementById('searchQuery').value;
+            const resultDiv = document.getElementById('searchResults');
+            const searchBtn = document.getElementById('searchBtn');
+            
+            debugLog('Starting search', { query });
+            
+            resultDiv.innerHTML = '<div class="spinner"></div><div class="loading-text">Searching...</div>';
+            searchBtn.disabled = true;
+            
+            try {
+                debugLog('Sending search request');
+                
+                const response = await fetch(`${API_URL}/search`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ query, top_k: 5 })
+                });
+                
+                debugLog('Search response status', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const results = await response.json();
+                debugLog('Search results', results);
+                
+                if (results.length === 0) {
+                    resultDiv.innerHTML = '<div class="result-section"><p style="text-align: center; color: var(--text-dim);">No results found.</p></div>';
+                } else {
+                    let html = '<div class="result-section">';
+                    
+                    results.forEach(result => {
+                        const categoryClass = result.document_class.toLowerCase().replace(' ', '-');
+                        html += `
+                            <div class="search-result">
+                                <div class="result-card">
+                                    <div class="result-header">
+                                        <span class="result-filename">${result.filename}</span>
+                                        <div>
+                                            <span class="badge badge-${categoryClass}">${result.document_class}</span>
+                                            <span class="relevance-score">${(result.relevance_score * 100).toFixed(0)}% match</span>
+                                        </div>
+                                    </div>
+                                    <div class="preview-text">${result.preview}</div>
+                        `;
+                        
+                        if (Object.keys(result.extracted_data).length > 0) {
+                            html += '<div class="extracted-data">';
+                            for (const [key, value] of Object.entries(result.extracted_data)) {
+                                html += `
+                                    <div class="data-item">
+                                        <div class="data-label">${key.replace(/_/g, ' ')}</div>
+                                        <div class="data-value">${value}</div>
+                                    </div>
+                                `;
+                            }
+                            html += '</div>';
+                        }
+                        
+                        html += '</div></div>';
+                    });
+                    
+                    html += '</div>';
+                    resultDiv.innerHTML = html;
+                }
+                
+                searchBtn.disabled = false;
+                
+            } catch (error) {
+                debugLog('Search error', error);
+                console.error('Full error:', error);
+                
+                let errorMessage = 'Error searching documents. ';
+                
+                if (error.message.includes('Failed to fetch')) {
+                    errorMessage += 'Cannot connect to API. Is the server running?';
+                } else {
+                    errorMessage += error.message;
+                }
+                
+                resultDiv.innerHTML = `
+                    <div style="color: var(--error); text-align: center; margin-top: 2rem; padding: 1rem; background: rgba(239, 68, 68, 0.1); border-radius: 8px;">
+                        <strong>❌ ${errorMessage}</strong>
+                        <br><br>
+                        <small>Check browser console (F12) for details</small>
+                    </div>
+                `;
+                searchBtn.disabled = false;
+            }
+        }
+        
+        // Ask question
+        async function askQuestion(event) {
+            event.preventDefault();
+            
+            const question = document.getElementById('questionInput').value;
+            const resultDiv = document.getElementById('qaResults');
+            const qaBtn = document.getElementById('qaBtn');
+            
+            debugLog('Asking question', { question });
+            
+            resultDiv.innerHTML = '<div class="spinner"></div><div class="loading-text">Thinking...</div>';
+            qaBtn.disabled = true;
+            
+            try {
+                debugLog('Sending Q&A request');
+                
+                const response = await fetch(`${API_URL}/ask`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ question })
+                });
+                
+                debugLog('Q&A response status', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                debugLog('Q&A response data', data);
+                
+                let html = `
+                    <div class="result-section">
+                        <div class="answer-box">
+                            <div class="answer-text">${data.answer}</div>
+                            <div class="sources">
+                                <div class="sources-label">Sources:</div>
+                                ${data.sources.map(s => `<span class="source-tag">${s}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                resultDiv.innerHTML = html;
+                qaBtn.disabled = false;
+                
+            } catch (error) {
+                debugLog('Q&A error', error);
+                console.error('Full error:', error);
+                
+                let errorMessage = 'Error getting answer. ';
+                
+                if (error.message.includes('Failed to fetch')) {
+                    errorMessage += 'Cannot connect to API. Is the server running?';
+                } else {
+                    errorMessage += error.message;
+                }
+                
+                resultDiv.innerHTML = `
+                    <div style="color: var(--error); text-align: center; margin-top: 2rem; padding: 1rem; background: rgba(239, 68, 68, 0.1); border-radius: 8px;">
+                        <strong>❌ ${errorMessage}</strong>
+                        <br><br>
+                        <small>Check browser console (F12) for details</small>
+                    </div>
+                `;
+                qaBtn.disabled = false;
+            }
+        }
+        
+        // Load stats
+        async function loadStats() {
+            try {
+                debugLog('Loading stats');
+                
+                const response = await fetch(`${API_URL}/stats`);
+                
+                debugLog('Stats response status', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                debugLog('Stats data', data);
+                
+                document.getElementById('totalDocs').textContent = data.total_documents || 0;
+                document.getElementById('invoiceCount').textContent = data.categories.Invoice || 0;
+                document.getElementById('resumeCount').textContent = data.categories.Resume || 0;
+            } catch (error) {
+                debugLog('Stats loading error', error);
+                console.error('Failed to load stats:', error);
+                
+                // Show connection error in stats
+                if (error.message.includes('Failed to fetch')) {
+                    document.getElementById('totalDocs').textContent = '?';
+                    document.getElementById('invoiceCount').textContent = '?';
+                    document.getElementById('resumeCount').textContent = '?';
+                    
+                    console.warn('⚠️ Cannot connect to API. Make sure the server is running on http://localhost:8001');
+                }
+            }
+        }
+        
+        // Close modal on background click (but not during upload) - ONLY for search/qa modals
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            // Skip uploadModal if it exists
+            if (modal.id === 'uploadModal' || modal.id === 'uploadOverlay') return;
+            
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal && !isUploading) {
+                    modal.classList.remove('active');
+                } else if (e.target === modal && isUploading) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                }
+            });
+        });
+        
+        // Handle search modal close button
+        if (document.getElementById('searchModalClose')) {
+            document.getElementById('searchModalClose').addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                closeModal('searchModal');
+            });
+        }
+        
+        // Handle Q&A modal close button
+        if (document.getElementById('qaModalClose')) {
+            document.getElementById('qaModalClose').addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                closeModal('qaModal');
+            });
+        }
+        
+        // Prevent clicks on upload overlay from triggering anything
+        const uploadOverlay = document.getElementById('uploadOverlay');
+        if (uploadOverlay) {
+            // BLOCK ALL CLICKS DURING UPLOAD
+            uploadOverlay.addEventListener('click', function(e) {
+                if (isUploading) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    debugLog('Click blocked during upload');
+                    return false;
+                }
+                // Only allow closing when not uploading and clicking background
+                if (e.target === uploadOverlay) {
+                    hideUploadSection();
+                }
+            });
+        }
+        
+        // Completely block escape key during upload
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && isUploading) {
+                debugLog('Escape key blocked during upload');
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }, true);
+        
+        // CRITICAL: Prevent page unload during upload
+        window.addEventListener('beforeunload', function(e) {
+            if (isUploading) {
+                e.preventDefault();
+                e.returnValue = 'Upload in progress! Are you sure you want to leave?';
+                return e.returnValue;
+            }
+        });
+    </script>
+</body>
+</html>

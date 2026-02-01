@@ -1,0 +1,20 @@
+{
+  "invoice_1.pdf": "Invoice #1001\nDate: 2025-06-16\nCompany: Pioneer Ltd\nTotal Amount: $2073.00\nThank you for your business!",
+  "invoice_2.pdf": "Invoice #1002\nDate: 2025-03-25\nCompany: Pioneer Ltd\nTotal Amount: $2996.00\nThank you for your business!",
+  "invoice_3.pdf": "Invoice #1003\nDate: 2025-06-24\nCompany: GlobalTech\nTotal Amount: $4806.00\nThank you for your business!",
+  "invoice_4.pdf": "Invoice #1004\nDate: 2025-03-26\nCompany: Acme Corp\nTotal Amount: $1955.00\nThank you for your business!",
+  "invoice_5.pdf": "Invoice #1005\nDate: 2025-06-10\nCompany: Bright Future LLC\nTotal Amount: $3612.00\nThank you for your business!",
+  "other_1.pdf": "Document ID: 1\nThis is a general document containing random information.\nIt does not fit into any specific category like invoice or resume.",
+  "other_2.pdf": "Document ID: 2\nThis is a general document containing random information.\nIt does not fit into any specific category like invoice or resume.",
+  "other_3.pdf": "Document ID: 3\nThis is a general document containing random information.\nIt does not fit into any specific category like invoice or resume.",
+  "resume_1.pdf": "John Doe\nEmail: john.doe@example.com\nPhone: +1-555-799-6125\nExperience: 5 years\nSummary: Experienced professional skilled in AI and software engineering.",
+  "resume_2.pdf": "Jane Smith\nEmail: jane.smith@example.com\nPhone: +1-555-486-5877\nExperience: 1 years\nSummary: Experienced professional skilled in AI and software engineering.",
+  "resume_3.pdf": "Ali Khan\nEmail: ali.khan@example.com\nPhone: +1-555-980-6266\nExperience: 4 years\nSummary: Experienced professional skilled in AI and software engineering.",
+  "resume_4.pdf": "Maria Garcia\nEmail: maria.garcia@example.com\nPhone: +1-555-233-1405\nExperience: 1 years\nSummary: Experienced professional skilled in AI and software engineering.",
+  "resume_5.pdf": "David Lee\nEmail: david.lee@example.com\nPhone: +1-555-305-2284\nExperience: 2 years\nSummary: Experienced professional skilled in AI and software engineering.",
+  "utilitybill_1.pdf": "Account Number: ACC-49575\nBilling Date: 2025-05-24\nUsage: 406 kWh\nAmount Due: $193.00\nUtility Provider: CityElectric",
+  "utilitybill_2.pdf": "Account Number: ACC-55530\nBilling Date: 2025-02-12\nUsage: 855 kWh\nAmount Due: $622.00\nUtility Provider: CityElectric",
+  "utilitybill_3.pdf": "Account Number: ACC-33934\nBilling Date: 2025-06-12\nUsage: 558 kWh\nAmount Due: $345.00\nUtility Provider: CityElectric",
+  "utilitybill_4.pdf": "Account Number: ACC-77424\nBilling Date: 2025-04-25\nUsage: 384 kWh\nAmount Due: $402.00\nUtility Provider: CityElectric",
+  "utilitybill_5.pdf": "Account Number: ACC-41029\nBilling Date: 2025-06-11\nUsage: 871 kWh\nAmount Due: $127.00\nUtility Provider: PowerGrid Co"
+}

@@ -1,0 +1,28 @@
+{
+  "invoice_4.pdf": {
+    "id": 1,
+    "filename": "invoice_4.pdf",
+    "category": "Invoice",
+    "extracted_data": {
+      "invoice_number": "1004",
+      "date": "2025-03-26",
+      "company": "Acme Corp",
+      "total_amount": 1955.0
+    },
+    "text": "Invoice #1004\nDate: 2025-03-26\nCompany: Acme Corp\nTotal Amount: $1955.00\nThank you for your business!",
+    "upload_date": "2026-02-01T02:08:56.128294"
+  },
+  "resume_2.pdf": {
+    "id": 2,
+    "filename": "resume_2.pdf",
+    "category": "Resume",
+    "extracted_data": {
+      "name": "Jane Smith",
+      "email": "jane.smith@example.com",
+      "phone": "+1-555-486-5877",
+      "experience_years": 1
+    },
+    "text": "Jane Smith\nEmail: jane.smith@example.com\nPhone: +1-555-486-5877\nExperience: 1 years\nSummary: Experienced professional skilled in AI and software engineering.",
+    "upload_date": "2026-02-01T02:47:37.686742"
+  }
+}

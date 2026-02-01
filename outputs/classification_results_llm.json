@@ -1,0 +1,116 @@
+{
+  "invoice_1.pdf": {
+    "class": "Invoice",
+    "invoice_number": "1001",
+    "date": "2025-06-16",
+    "company": "Pioneer Ltd",
+    "total_amount": 2073.0
+  },
+  "invoice_2.pdf": {
+    "class": "Invoice",
+    "invoice_number": "1002",
+    "date": "2025-03-25",
+    "company": "Pioneer Ltd",
+    "total_amount": 2996.0
+  },
+  "invoice_3.pdf": {
+    "class": "Invoice",
+    "invoice_number": "1003",
+    "date": "2025-06-24",
+    "company": "GlobalTech",
+    "total_amount": 4806.0
+  },
+  "invoice_4.pdf": {
+    "class": "Invoice",
+    "invoice_number": "1004",
+    "date": "2025-03-26",
+    "company": "Acme Corp",
+    "total_amount": 1955.0
+  },
+  "invoice_5.pdf": {
+    "class": "Invoice",
+    "invoice_number": "1005",
+    "date": "2025-06-10",
+    "company": "Bright Future LLC",
+    "total_amount": 3612.0
+  },
+  "other_1.pdf": {
+    "class": "Other"
+  },
+  "other_2.pdf": {
+    "class": "Other"
+  },
+  "other_3.pdf": {
+    "class": "Other"
+  },
+  "resume_1.pdf": {
+    "class": "Resume",
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "phone": "+1-555-799-6125",
+    "experience_years": 5
+  },
+  "resume_2.pdf": {
+    "class": "Resume",
+    "name": "Jane Smith",
+    "email": "jane.smith@example.com",
+    "phone": "+1-555-486-5877",
+    "experience_years": 1
+  },
+  "resume_3.pdf": {
+    "class": "Resume",
+    "name": "Ali Khan",
+    "email": "ali.khan@example.com",
+    "phone": "+1-555-980-6266",
+    "experience_years": 4
+  },
+  "resume_4.pdf": {
+    "class": "Resume",
+    "name": "Maria Garcia",
+    "email": "maria.garcia@example.com",
+    "phone": "+1-555-233-1405",
+    "experience_years": 1
+  },
+  "resume_5.pdf": {
+    "class": "Resume",
+    "name": "David Lee",
+    "email": "david.lee@example.com",
+    "phone": "+1-555-305-2284",
+    "experience_years": 2
+  },
+  "utilitybill_1.pdf": {
+    "class": "Utility Bill",
+    "account_number": "ACC-49575",
+    "billing_date": "2025-05-24",
+    "usage": "406 kWh",
+    "amount_due": 193.0
+  },
+  "utilitybill_2.pdf": {
+    "class": "Utility Bill",
+    "account_number": "ACC-55530",
+    "billing_date": "2025-02-12",
+    "usage": "855 kWh",
+    "amount_due": 622.0
+  },
+  "utilitybill_3.pdf": {
+    "class": "Utility Bill",
+    "account_number": "ACC-33934",
+    "billing_date": "2025-06-12",
+    "usage": "558 kWh",
+    "amount_due": 345.0
+  },
+  "utilitybill_4.pdf": {
+    "class": "Utility Bill",
+    "account_number": "ACC-77424",
+    "billing_date": "2025-04-25",
+    "usage": "384 kWh",
+    "amount_due": 402.0
+  },
+  "utilitybill_5.pdf": {
+    "class": "Utility Bill",
+    "account_number": "ACC-41029",
+    "billing_date": "2025-06-11",
+    "usage": "871 kWh",
+    "amount_due": 127.0
+  }
+}
