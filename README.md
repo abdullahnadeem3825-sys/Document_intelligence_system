@@ -254,10 +254,10 @@ Then open: `http://localhost:8080/index.html`
 
 ## 🖼️ Screenshots
 
-![Main Interface](images/main_page.png)
+![Main Interface](images\main_page.PNG)
 *Main dashboard with three powerful features*
 
-![Upload Result](images/upload_result.png)
+![Upload Result](images\upload_result.PNG)
 *Automatic classification and data extraction*
 
 **Quick Example:**
