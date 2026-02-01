@@ -145,7 +145,7 @@ class EmbeddingBuilder:
         dimension = embeddings.shape[1]
         index = faiss.IndexFlatL2(dimension)
         index.add(embeddings)
-        print(f"✓ FAISS index built with dimension {dimension}")
+        print(f" FAISS index built with dimension {dimension}")
         
         # Step 4: Save everything to disk
         print("\nSaving to disk...")
