@@ -1128,101 +1128,106 @@
         
         // Search documents
         async function searchDocuments(event) {
-            event.preventDefault();
-            
-            const query = document.getElementById('searchQuery').value;
-            const resultDiv = document.getElementById('searchResults');
-            const searchBtn = document.getElementById('searchBtn');
-            
-            debugLog('Starting search', { query });
-            
-            resultDiv.innerHTML = '<div class="spinner"></div><div class="loading-text">Searching...</div>';
-            searchBtn.disabled = true;
-            
-            try {
-                debugLog('Sending search request');
-                
-                const response = await fetch(`${API_URL}/search`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ query, top_k: 5 })
-                });
-                
-                debugLog('Search response status', response.status);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const results = await response.json();
-                debugLog('Search results', results);
-                
-                if (results.length === 0) {
-                    resultDiv.innerHTML = '<div class="result-section"><p style="text-align: center; color: var(--text-dim);">No results found.</p></div>';
-                } else {
-                    let html = '<div class="result-section">';
-                    
-                    results.forEach(result => {
-                        const categoryClass = result.document_class.toLowerCase().replace(' ', '-');
-                        html += `
-                            <div class="search-result">
-                                <div class="result-card">
-                                    <div class="result-header">
-                                        <span class="result-filename">${result.filename}</span>
-                                        <div>
-                                            <span class="badge badge-${categoryClass}">${result.document_class}</span>
-                                            <span class="relevance-score">${(result.relevance_score * 100).toFixed(0)}% match</span>
-                                        </div>
-                                    </div>
-                                    <div class="preview-text">${result.preview}</div>
-                        `;
-                        
-                        if (Object.keys(result.extracted_data).length > 0) {
-                            html += '<div class="extracted-data">';
-                            for (const [key, value] of Object.entries(result.extracted_data)) {
-                                html += `
-                                    <div class="data-item">
-                                        <div class="data-label">${key.replace(/_/g, ' ')}</div>
-                                        <div class="data-value">${value}</div>
-                                    </div>
-                                `;
-                            }
-                            html += '</div>';
-                        }
-                        
-                        html += '</div></div>';
-                    });
-                    
-                    html += '</div>';
-                    resultDiv.innerHTML = html;
-                }
-                
-                searchBtn.disabled = false;
-                
-            } catch (error) {
-                debugLog('Search error', error);
-                console.error('Full error:', error);
-                
-                let errorMessage = 'Error searching documents. ';
-                
-                if (error.message.includes('Failed to fetch')) {
-                    errorMessage += 'Cannot connect to API. Is the server running?';
-                } else {
-                    errorMessage += error.message;
-                }
-                
-                resultDiv.innerHTML = `
-                    <div style="color: var(--error); text-align: center; margin-top: 2rem; padding: 1rem; background: rgba(239, 68, 68, 0.1); border-radius: 8px;">
-                        <strong>❌ ${errorMessage}</strong>
-                        <br><br>
-                        <small>Check browser console (F12) for details</small>
-                    </div>
-                `;
-                searchBtn.disabled = false;
-            }
+    event.preventDefault();
+    
+    const query = document.getElementById('searchQuery').value.trim();
+    const resultDiv = document.getElementById('searchResults');
+    const searchBtn = document.getElementById('searchBtn');
+    
+    if (!query) {
+        resultDiv.innerHTML = '<p style="text-align:center; color:var(--warning);">Please enter a search query</p>';
+        return;
+    }
+    
+    debugLog('Starting search', { query });
+    
+    resultDiv.innerHTML = '<div class="spinner"></div><div class="loading-text">Searching...</div>';
+    searchBtn.disabled = true;
+    
+    try {
+        const response = await fetch(`${API_URL}/search`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query, top_k: 2 })
+        });
+        
+        debugLog('Search response status', response.status);
+        
+        if (!response.ok) {
+            throw new Error(`Server returned ${response.status}`);
         }
+        
+        const results = await response.json();
+        debugLog('Raw results from API', results);
+        
+        // ──────────────────────────────────────────────
+        // Always clear loading first — critical fix
+        // ──────────────────────────────────────────────
+        resultDiv.innerHTML = '';  
+        
+        if (!Array.isArray(results) || results.length === 0) {
+            resultDiv.innerHTML = '<div class="result-section"><p style="text-align: center; color: var(--text-dim);">No matching documents found.</p></div>';
+        } else {
+            let html = '<div class="result-section">';
+            
+            results.forEach(result => {
+                const categoryClass = (result.document_class || 'Other').toLowerCase().replace(' ', '-');
+                const scorePercent = (result.relevance_score * 100).toFixed(0);
+                
+                html += `
+                    <div class="search-result">
+                        <div class="result-card">
+                            <div class="result-header">
+                                <span class="result-filename">${result.filename || 'Unknown file'}</span>
+                                <div>
+                                    <span class="badge badge-${categoryClass}">${result.document_class || 'Other'}</span>
+                                    <span class="relevance-score">${scorePercent}% match</span>
+                                </div>
+                            </div>
+                            <div class="preview-text">${result.preview || '(no preview available)'}</div>
+                `;
+                
+                if (result.extracted_data && Object.keys(result.extracted_data).length > 0) {
+                    html += '<div class="extracted-data">';
+                    for (const [key, value] of Object.entries(result.extracted_data)) {
+                        html += `
+                            <div class="data-item">
+                                <div class="data-label">${key.replace(/_/g, ' ').toUpperCase()}</div>
+                                <div class="data-value">${value}</div>
+                            </div>
+                        `;
+                    }
+                    html += '</div>';
+                }
+                
+                html += '</div></div>';
+            });
+            
+            html += '</div>';
+            resultDiv.innerHTML = html;
+        }
+        
+    } catch (error) {
+        debugLog('Search error', error);
+        console.error(error);
+        
+        let msg = 'Error during search. ';
+        if (error.message.includes('Failed to fetch')) {
+            msg += 'Cannot reach the API server (is it running on port 8001?)';
+        } else {
+            msg += error.message;
+        }
+        
+        resultDiv.innerHTML = `
+            <div style="color: var(--error); text-align: center; padding: 1.5rem; background: rgba(239,68,68,0.1); border-radius: 8px;">
+                <strong>❌ ${msg}</strong><br><br>
+                <small>Open browser console (F12) for more details</small>
+            </div>
+        `;
+    } finally {
+        searchBtn.disabled = false;
+    }
+}
         
         // Ask question
         async function askQuestion(event) {

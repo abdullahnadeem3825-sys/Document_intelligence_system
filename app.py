@@ -8,7 +8,8 @@ Features:
 
 Important:
 - Documents from /upload are ONLY classified & extracted
-- They are NOT added to FAISS index or documents_db.json
+- They are NOT added to FAISS index or documents.json
+- Search & Ask use pre-existing embeddings from 'embeddings/' folder
 """
 
 import os
@@ -19,7 +20,6 @@ import re
 import warnings
 from pathlib import Path
 from typing import Dict, Any, List, Optional
-from datetime import datetime
 
 warnings.filterwarnings('ignore')
 
@@ -27,7 +27,6 @@ import torch
 import numpy as np
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 from sentence_transformers import SentenceTransformer
@@ -140,23 +139,33 @@ class DocumentExtractor:
 class DocumentIntelligenceSystem:
     CATEGORIES = ["Invoice", "Resume", "Utility Bill", "Other", "Unclassifiable"]
 
-    def __init__(self, data_dir: str = "data"):
-        self.data_dir = Path(data_dir)
-        self.data_dir.mkdir(exist_ok=True)
+    def __init__(self, embeddings_dir: str = "embeddings", uploads_dir: str = "uploads"):
+        
+        self.embeddings_dir = Path(embeddings_dir).resolve()
+        self.uploads_dir    = Path(uploads_dir).resolve()
 
-        self.uploads_dir = self.data_dir / "uploads"
+        self.embeddings_dir.mkdir(exist_ok=True)
         self.uploads_dir.mkdir(exist_ok=True)
 
-        self.db_file = self.data_dir / "documents_db.json"
-        self.index_file = self.data_dir / "embeddings.index"
+        self.db_file        = self.embeddings_dir / "documents.json"
+        self.filenames_file = self.embeddings_dir / "filenames.json"
+        self.index_file     = self.embeddings_dir / "faiss_index.bin"
 
-        self.documents_db = self._load_db()
+        self.documents_db   = self._load_db()           # {filename: text}
+        self.ordered_filenames = self._load_ordered_filenames()  # list in FAISS order
 
         print("Loading models...")
         self.pipe, self.tokenizer = self._load_llm()
         self.embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
         self.index = self._load_or_create_index()
-        print(" System ready!")
+        
+        print(f"Loaded from: {self.embeddings_dir}")
+        print(f"Documents: {len(self.documents_db)}")
+        print(f"Ordered filenames: {len(self.ordered_filenames)}")
+        print(f"Index vectors: {self.index.ntotal if self.index else 0}")
+        if len(self.ordered_filenames) != self.index.ntotal:
+            print("WARNING: filenames count != index size → mismatch!")
+        print("System ready!")
 
     def _load_llm(self):
         model_id = "Qwen/Qwen2.5-3B-Instruct"
@@ -179,25 +188,36 @@ class DocumentIntelligenceSystem:
             pad_token_id=tokenizer.pad_token_id or tokenizer.eos_token_id,
         )
         return pipe, tokenizer
-
-    def _load_db(self) -> Dict:
+    def _load_db(self) -> Dict[str, str]:
         if self.db_file.exists():
             with open(self.db_file, 'r', encoding='utf-8') as f:
-                return json.load(f)
+                data = json.load(f)
+                if not isinstance(data, dict):
+                    print("Warning: documents.json not a dict → empty")
+                    return {}
+                return data
+        print("documents.json not found → empty")
         return {}
-
-    def _save_db(self):
-        with open(self.db_file, 'w', encoding='utf-8') as f:
-            json.dump(self.documents_db, f, indent=2, ensure_ascii=False)
+    def _load_ordered_filenames(self) -> List[str]:
+        if self.filenames_file.exists():
+            with open(self.filenames_file, 'r', encoding='utf-8') as f:
+                fnames = json.load(f)
+                if isinstance(fnames, list):
+                    return fnames
+        print("filenames.json not found or invalid → fallback to dict keys")
+        return list(self.documents_db.keys())
 
     def _load_or_create_index(self):
-        if self.index_file.exists() and len(self.documents_db) > 0:
-            return faiss.read_index(str(self.index_file))
+        if self.index_file.exists():
+            try:
+                idx = faiss.read_index(str(self.index_file))
+                print(f"FAISS index loaded successfully ({idx.ntotal} vectors)")
+                return idx
+            except Exception as e:
+                print(f"Failed to load FAISS: {e}")
         dimension = 384
-        return faiss.IndexFlatIP(dimension)  # cosine similarity
-
-    def _save_index(self):
-        faiss.write_index(self.index, str(self.index_file))
+        print("No valid index → creating empty one")
+        return faiss.IndexFlatL2(dimension)
 
     def _apply_chat_template(self, system_msg: str, user_msg: str) -> str:
         messages = [
@@ -207,6 +227,7 @@ class DocumentIntelligenceSystem:
         return self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
 
     def classify_document(self, text: str) -> str:
+        # (unchanged - same as before)
         if not text or text.startswith("UNREADABLE") or len(text.strip()) < 30:
             return "Unclassifiable"
 
@@ -231,13 +252,12 @@ Respond with ONLY the category name. Nothing else."""
         if category in self.CATEGORIES:
             return category
 
-        # fallback keyword check
         text_lower = text.lower()
-        if sum(kw in text_lower for kw in ["invoice", "inv-", "total amount", "amount due", "subtotal"]) >= 2:
+        if sum(kw in text_lower for kw in ["invoice", "inv-", "total amount", "amount due"]) >= 2:
             return "Invoice"
-        if sum(kw in text_lower for kw in ["experience", "skills", "education", "@", "curriculum"]) >= 2:
+        if sum(kw in text_lower for kw in ["experience", "skills", "education", "@"]) >= 2:
             return "Resume"
-        if sum(kw in text_lower for kw in ["kwh", "account number", "billing period", "utility"]) >= 2:
+        if sum(kw in text_lower for kw in ["kwh", "account number", "billing", "utility"]) >= 2:
             return "Utility Bill"
         return "Other"
 
@@ -249,6 +269,8 @@ Respond with ONLY the category name. Nothing else."""
         elif category == "Utility Bill":
             return self._extract_utility(text)
         return {}
+
+    # _extract_invoice, _extract_resume, _extract_utility, _parse_json  → unchanged
 
     def _extract_invoice(self, text: str) -> Dict[str, Any]:
         system_msg = """You are a data extraction assistant. Extract invoice information and return ONLY a valid JSON object.
@@ -328,79 +350,84 @@ Return ONLY the JSON, no other text."""
             "extracted_data": extracted
         }
 
-    def process_upload(self, file_path: Path, filename: str) -> Dict[str, Any]:
-        """Full indexing version — use manually or via future /index endpoint"""
-        text = DocumentExtractor.extract_text(file_path)
-        category = self.classify_document(text)
-        extracted = self.extract_data(text, category)
-        print("Extracted data:", extracted)
+    def _infer_category_and_extract(self, filename: str, text: str) -> tuple[str, Dict]:
+        fname_lower = filename.lower()
+        if "invoice" in fname_lower:
+            cat = "Invoice"
+        elif "resume" in fname_lower:
+            cat = "Resume"
+        elif "utilitybill" in fname_lower or "utility" in fname_lower:
+            cat = "Utility Bill"
+        else:
+            cat = "Other"
 
-        embedding = self.embedding_model.encode([text[:5000]])[0]
-        embedding = embedding / np.linalg.norm(embedding)
+        extracted = self.extract_data(text, cat)
+        return cat, extracted
 
-        doc_id = len(self.documents_db)
-        self.index.add(np.array([embedding], dtype=np.float32))
+    def semantic_search(self, query: str, top_k: int = 2) -> List[SearchResult]:
 
-        self.documents_db[filename] = {
-            "id": doc_id,
-            "filename": filename,
-            "category": category,
-            "extracted_data": extracted,
-            "text": text[:10000],
-            "upload_date": datetime.now().isoformat(),
-        }
-
-        self._save_db()
-        self._save_index()
-
-        return {
-            "filename": filename,
-            "category": category,
-            "extracted_data": extracted,
-        }
-
-    def semantic_search(self, query: str, top_k: int = 5) -> List[SearchResult]:
-        if len(self.documents_db) == 0:
+        if self.index.ntotal == 0:
+            print("Index empty → no results")
             return []
 
         q_emb = self.embedding_model.encode([query])[0]
-        q_emb = q_emb / np.linalg.norm(q_emb)
+        q_emb = q_emb / np.linalg.norm(q_emb)   # for cosine if you switch to IndexFlatIP later
 
+        # Builder used IndexFlatL2 → smaller = better (distance)
+        # But your SearchResult uses relevance_score (higher better)
+        # So we convert: score = 1 / (1 + dist) or -dist
         distances, indices = self.index.search(
             np.array([q_emb], dtype=np.float32),
-            min(top_k, len(self.documents_db))
+            min(top_k, self.index.ntotal)
         )
 
         results = []
         for dist, idx in zip(distances[0], indices[0]):
-            if idx < 0:
+            if idx < 0 or idx >= len(self.ordered_filenames):
                 continue
-            for doc in self.documents_db.values():
-                if doc["id"] == idx:
-                    results.append(SearchResult(
-                        filename=doc["filename"],
-                        relevance_score=float(dist),
-                        document_class=doc["category"],
-                        preview=doc.get("text", "")[:200] + "...",
-                        extracted_data=doc["extracted_data"]
-                    ))
-                    break
+
+            filename = self.ordered_filenames[idx]
+            if filename not in self.documents_db:
+                print(f"Missing text for: {filename} (index {idx})")
+                continue
+
+            text = self.documents_db[filename]
+
+            category, extracted = self._infer_category_and_extract(filename, text)
+
+            preview = text[:180] + "..." if len(text) > 180 else text
+
+            # L2 distance → lower better → convert to similarity-like score
+            relevance = 1.0 / (1.0 + dist)   # simple heuristic, 0..1 range
+
+            results.append(SearchResult(
+                filename=filename,
+                relevance_score=float(relevance),
+                document_class=category,
+                preview=preview,
+                extracted_data=extracted
+            ))
+            # print("Result: ", results)
+
+        # Optional: sort by relevance descending
+        results.sort(key=lambda x: x.relevance_score, reverse=True)
         return results
 
     def answer_question(self, question: str) -> AnswerResponse:
-        results = self.semantic_search(question, top_k=3)
+        results = self.semantic_search(question, top_k=4)
         if not results:
             return AnswerResponse(answer="No relevant documents found.", sources=[])
 
         context = ""
         sources = []
         for r in results:
-            doc = self.documents_db[r.filename]
-            context += f"\n--- {r.filename} ---\n{doc.get('text', '')[:2000]}\n"
+            text = self.documents_db.get(r.filename, "")
+            context += f"\n--- {r.filename} ({r.document_class}) ---\n{text.strip()}\n"
             sources.append(r.filename)
 
-        system_msg = """Answer based ONLY on the provided documents.
-If the information is not there, say so. Be concise."""
+        system_msg = """Answer based ONLY on the provided document excerpts.
+If the information is not there, say "I don't have that information".
+Be concise and factual."""
         user_msg = f"Documents:\n{context}\n\nQuestion: {question}"
         prompt = self._apply_chat_template(system_msg, user_msg)
 
@@ -422,19 +449,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-system = DocumentIntelligenceSystem()
+system = DocumentIntelligenceSystem(embeddings_dir="embeddings")
 
 
 @app.get("/")
 async def root():
     return {
         "message": "Document Intelligence API",
-        "note": "Uploaded documents are classified only — not indexed. Use manual indexing for search/Q&A.",
+        "note": "Using pre-built embeddings from 'embeddings/' folder. Uploads are classified only.",
         "endpoints": {
             "upload": "/upload → classify + extract (no indexing)",
-            "search": "/search → semantic search (indexed docs only)",
-            "ask": "/ask → question answering (indexed docs only)",
-            "stats": "/stats → number of indexed documents"
+            "search": "/search → semantic search",
+            "ask": "/ask → question answering",
+            "stats": "/stats → document count"
         }
     }
 
@@ -449,8 +476,7 @@ async def upload_document(file: UploadFile = File(...)):
             f.write(content)
 
         result = system.classify_and_extract_only(file_path, file.filename)
-        print(f"Processed (no index): {file.filename} → {result['category']}")
-        print("Extracted result:", result)
+        print(f"Processed: {file.filename} → {result['category']}")
         return result
 
     except Exception as e:
@@ -462,7 +488,7 @@ async def upload_document(file: UploadFile = File(...)):
 async def search_documents(request: SearchRequest):
     try:
         results = system.semantic_search(request.query, request.top_k)
-        print(f"Search '{request.query}' → {len(results)} results")
+        print(f"Search '{request.query[:60]}...' → {len(results)} results")
         return [r.dict() for r in results]
     except Exception as e:
         raise HTTPException(500, detail=str(e))
@@ -473,6 +499,7 @@ async def ask_question(request: QuestionRequest):
     try:
         answer = system.answer_question(request.question)
         print(f"Q&A: '{request.question[:60]}...' → {len(answer.sources)} sources")
+        print("Answer: ", answer)
         return answer.dict()
     except Exception as e:
         raise HTTPException(500, detail=str(e))
@@ -481,9 +508,19 @@ async def ask_question(request: QuestionRequest):
 @app.get("/stats")
 async def get_stats():
     from collections import Counter
-    categories = Counter(d["category"] for d in system.documents_db.values())
+    categories = Counter()
+    for fname in system.documents_db.keys():
+        if "invoice" in fname.lower():
+            categories["Invoice"] += 1
+        elif "resume" in fname.lower():
+            categories["Resume"] += 1
+        elif "utility" in fname.lower():
+            categories["Utility Bill"] += 1
+        else:
+            categories["Other"] += 1
+
     return {
-        "total_indexed_documents": len(system.documents_db),
+        "total_documents": len(system.documents_db),
         "categories": dict(categories)
     }
 
